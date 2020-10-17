@@ -119,7 +119,7 @@ namespace LearningVectorQuantization
             // поиск файла (последний в папке)
             int index = Array.IndexOf(allfolders, comboBox1.SelectedItem.ToString());
 
-            Recognition recognition = new Recognition(numberInput, numberOutput,VectorW, files[index][files[index].Length - 1]);
+            Recognition recognition = new Recognition(numberInput, numberOutput,VectorW, files[index][files[index].Length-1]);
             Graphics g = pictureBox1.CreateGraphics();
             int y = pictureBox1.Width / numberOutput;
 
@@ -127,21 +127,11 @@ namespace LearningVectorQuantization
             int maxZ = recognition.Answer.Values.Max();
             int k = recognition.Answer.FirstOrDefault(x => x.Value == maxZ).Key;
 
-            double a1 = VectorW[0, k];
-            double a2 = VectorW[1, k];
-            double a3 = VectorW[2, k];
             richTextBox1.Text += (k+1).ToString() + " класс.\n";
             richTextBox1.Text +=" класс   -  кол-во.\n";
             foreach (int z in recognition.Answer.Keys)
-                richTextBox1.Text += z.ToString() + "   -   " + recognition.Answer[z].ToString() + "\n";
-
-            if (a1 > 255) a1 = 255;
-            if (a2 > 255) a2 = 255;
-            if (a3 > 255) a3 = 255;
-            if (a1 < 0) a1 = 0;
-            if (a2 < 0) a2 = 0;
-            if (a3 < 0) a3 = 0;
-
+                richTextBox1.Text += (z+1).ToString() + "   -   " + recognition.Answer[z].ToString() + "\n";
+            
             g.DrawRectangle(new Pen(Color.Black), k*y, 0, 
                                             y, pictureBox1.Height - 1);
             
