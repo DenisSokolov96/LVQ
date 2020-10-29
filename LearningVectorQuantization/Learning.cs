@@ -38,23 +38,42 @@ namespace LearningVectorQuantization
             readDatas();
             setW();
             
-            //для статуса
-            int proc = iterat / 90;
+            int dx, dy = 0;
+            double dist = 0;
             //кол-во итераций обучения
             for (int k = 0; k < iterat; k++)
             {
+                int countList = ListDataSet.Count();
                 //по классов
-                for (int ik = 0; ik < ListDataSet.Count(); ik++)
+                for (int ik = 0; ik < countList; ik++)
                 {
+                    int countIk = ListDataSet[ik].Count()/2 - 1;
                     //по файлам //не беру последний файл
-                    for (int ifile = 0; ifile < ListDataSet[ik].Count() - 1; ifile++)
+                    for (int ifile = 0; ifile < countIk; ifile++)
                     {
+                        int countListIF = ListDataSet[ik][ifile].Count/2;
                         //по по строчкам
-                        for (int istr = 0; istr < ListDataSet[ik][ifile].Count; istr++)
+                        for (int istr = 0; istr < countListIF; istr++)
                         {
+                            dx = 0; dy = 0;
+                            dist = Double.MaxValue;
+                            for (int j = 0; j < numberInput; j++)
+                                for (int i = 0; i < numberOutput; i++)
+                                {
+                                    double a = step1(ref j, ref i, ListDataSet[ik][ifile][istr]);
+                                    if (a < dist)
+                                    {
+                                        dist = a;
+                                        dy = i;
+                                        dx = j;
+                                    }
+                                }
+                            
+                            //Рассчитайте новый вес
                             double resSpeed = funcSpeedL(k);
-                            for (int id = 0; id < numberInput; id++)
-                                step1(ik, id, ListDataSet[ik][ifile][istr][id], resSpeed);                            
+                            for (int id = 0; id < numberInput; id++)                            
+                                step2(dx, dy, ListDataSet[ik][ifile][istr][id], resSpeed, ik, dx);
+                            
                         }
                     }
                 }
@@ -62,9 +81,20 @@ namespace LearningVectorQuantization
             }
         }
 
-        private void step1(int ik, int id, int a, double resSpeed)
+        //поиск близких значений
+        private double step1(ref int y, ref int x, int[] vector)
         {
-            VectorW[id, ik] += resSpeed * (a - VectorW[id, ik]); 
+            double distance = 0;
+            for (int i = 0; i < vector.Length; i++)
+                distance += (vector[i] - VectorW[y, x]) * (vector[i] - VectorW[y, x]);
+
+            return Math.Sqrt(distance);
+        }
+
+        private void step2(int dx, int dy, int a, double resSpeed, int T, int C)
+        {
+            if (T == C) VectorW[dx, dy] += resSpeed * (a - VectorW[dx, dy]); 
+            else VectorW[dx, dy] -= resSpeed * (a - VectorW[dx, dy]);
         }
 
         //скорость обучения
