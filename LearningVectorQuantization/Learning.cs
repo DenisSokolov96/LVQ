@@ -40,6 +40,7 @@ namespace LearningVectorQuantization
             
             int dx, dy = 0;
             double dist = 0;
+
             //кол-во итераций обучения
             for (int k = 0; k < iterat; k++)
             {
@@ -67,13 +68,11 @@ namespace LearningVectorQuantization
                                         dy = i;
                                         dx = j;
                                     }
-                                }
-                            
+                                }                        
                             //Рассчитайте новый вес
-                            double resSpeed = funcSpeedL(k);
+                            double resSpeed = funcSpeedL(k+1);
                             for (int id = 0; id < numberInput; id++)                            
-                                step2(dx, dy, ListDataSet[ik][ifile][istr][id], resSpeed, ik, dx);
-                            
+                                step2(id, ListDataSet[ik][ifile][istr][id], resSpeed, ik, dx);
                         }
                     }
                 }
@@ -91,10 +90,11 @@ namespace LearningVectorQuantization
             return Math.Sqrt(distance);
         }
 
-        private void step2(int dx, int dy, int a, double resSpeed, int T, int C)
+        //изменение весовых коэф. у нейрона победителя
+        private void step2(int xi, int a, double resSpeed, int T, int C)
         {
-            if (T == C) VectorW[dx, dy] += resSpeed * (a - VectorW[dx, dy]); 
-            else VectorW[dx, dy] -= resSpeed * (a - VectorW[dx, dy]);
+            if (T == C) VectorW[xi, T] += resSpeed * (a - VectorW[xi, T]); 
+            //else VectorW[xi, T] -= resSpeed * (a - VectorW[xi, T]);
         }
 
         //скорость обучения

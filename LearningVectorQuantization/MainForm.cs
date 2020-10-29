@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.IO;
+using System.Diagnostics;
 
 namespace LearningVectorQuantization
 {
@@ -51,12 +52,21 @@ namespace LearningVectorQuantization
         }
 
         private void обучитьToolStripMenuItem_Click(object sender, EventArgs e)
-        {            
+        {
+            // запускаем отсчёт времени
+            Stopwatch time = new Stopwatch(); 
+            time.Start(); 
+
             Start();
             Learning LearningForm = new Learning(SpeedL, numberInput, numberOutput, iterat, allfolders, files);
             VectorW = LearningForm.VectorW;
 
-            Draw();
+            WriteToInfo();
+
+            // останавливаем работу
+            time.Stop(); 
+            if (1 > time.Elapsed.Minutes) richTextBox1.Text += "Время выполнения: " + time.Elapsed.Seconds.ToString() + " сек.\n";
+            else richTextBox1.Text +="Время выполнения: " + time.Elapsed.Minutes.ToString() + " мин.\n";
         }
 
         private void Start()
@@ -75,55 +85,29 @@ namespace LearningVectorQuantization
 
         }
 
-        private void перерисоватьToolStripMenuItem_Click(object sender, EventArgs e)
+        private void WriteToInfo()
         {
-            Draw();
+            for (int i = 0; i < numberOutput; i++)
+            {
+                richTextBox1.Text += (i + 1).ToString() + ") ";
+                for (int j = 0; j < numberInput; j++)
+                    richTextBox1.Text += VectorW[j, i] + "\t";
+                richTextBox1.Text += "\n";
+            }
         }
 
         private void trackBar1_Scroll(object sender, EventArgs e)
         {
             label4.Text = ((double)trackBar1.Value / 10).ToString();
         }
-
-        private void Draw()
-        {
-
-            Graphics g = pictureBox1.CreateGraphics();
-            int y = pictureBox1.Width / numberOutput;
-            for (int j = 0; j < numberOutput; j++)
-            {
-                long a1 = (long)VectorW[0, j];
-                long a2 = (long)VectorW[1, j];
-                long a3 = (long)VectorW[2, j];
-
-                a1 *= 5;
-                a2 *= 5;
-                a3 *= 5;
-
-                if (a1 > 255) a1 = 255;
-                if (a2 > 255) a2 = 255;
-                if (a3 > 255) a3 = 255;
-                if (a1 < 0) a1 = 0;
-                if (a2 < 0) a2 = 0;
-                if (a3 < 0) a3 = 0;
-                g.FillRectangle(new SolidBrush(Color.FromArgb((int)a1, (int)a2, (int)a3)),
-                                                            j * y - 1, 0,
-                                                y, pictureBox1.Height);
-            }
-
-            g.Dispose();
-        }
-
+        
         private void распознатьToolStripMenuItem_Click(object sender, EventArgs e)
         {
             // поиск файла (последний в папке)
             int index = Array.IndexOf(allfolders, comboBox1.SelectedItem.ToString());
 
             Recognition recognition = new Recognition(numberInput, numberOutput,VectorW, files[index][files[index].Length-1]);
-            Graphics g = pictureBox1.CreateGraphics();
-            int y = pictureBox1.Width / numberOutput;
-
-           
+            
             int maxZ = recognition.Answer.Values.Max();
             int k = recognition.Answer.FirstOrDefault(x => x.Value == maxZ).Key;
 
@@ -131,11 +115,8 @@ namespace LearningVectorQuantization
             richTextBox1.Text +=" класс   -  кол-во.\n";
             foreach (int z in recognition.Answer.Keys)
                 richTextBox1.Text += (z+1).ToString() + "   -   " + recognition.Answer[z].ToString() + "\n";
-            
-            g.DrawRectangle(new Pen(Color.Black), k*y, 0, 
-                                            y, pictureBox1.Height - 1);
-            
-            g.Dispose();
+            richTextBox1.Text += "-------------------------------------\n";
+
         }
     }
 }

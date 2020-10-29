@@ -36,13 +36,10 @@ namespace LearningVectorQuantization
                         J = id;
                     }
                 }
+                if (Answer.ContainsKey(J)) Answer[J]++;
+                else Answer.Add(J, 1);
 
-                try { Answer[J]++; }
-                catch { Answer.Add(J, 1); }
             }
-
-            
-
         }
 
         //поиск близких значений
